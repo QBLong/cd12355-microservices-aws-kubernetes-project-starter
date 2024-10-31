@@ -47,7 +47,6 @@ spec:
       restartPolicy: Always
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
