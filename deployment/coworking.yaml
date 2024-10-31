@@ -1,23 +1,9 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: coworking
-spec:
-  type: LoadBalancer
-  selector:
-    service: coworking
-  ports:
-  - name: "5153"
-    protocol: TCP
-    port: 5153
-    targetPort: 5153
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: coworking
   labels:
-    name: coworking
+    service: coworking
+  name: coworking
 spec:
   replicas: 1
   selector:
@@ -29,28 +15,50 @@ spec:
         service: coworking
     spec:
       containers:
-      - name: coworking
-        image: <DOCKER_IMAGE_URI_FROM_ECR>
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /health_check
-            port: 5153
-          initialDelaySeconds: 5
-          timeoutSeconds: 2
-        readinessProbe:
-          httpGet:
-            path: "/readiness_check"
-            port: 5153
-          initialDelaySeconds: 5
-          timeoutSeconds: 5
-        envFrom:
-        - configMapRef:
-            name: <NAME OF THE ConfigMap>
-        env:
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: <NAME OF THE Secret>
-              key: <THE KEY FROM Secret WHICH has THE ENCODED PASSWORD>
+        - image: 590257532583.dkr.ecr.us-east-1.amazonaws.com/longqb-devops-project3-repository:latest
+          name: coworking
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5153
+          livenessProbe:
+            httpGet:
+              path: /health_check
+              port: 5153
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /readiness_check
+              port: 5153
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          resources:
+            requests:
+              memory: "1000Mi"
+              cpu: "250m"
+            limits:
+              memory: "2000Mi"
+              cpu: "500m"
+          envFrom:
+            - secretRef:
+                name: db-secret
+            - configMapRef:
+                name: db-config
       restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: coworking
+  name: coworking
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: "TCP"
+      port: 5153
+      targetPort: 5153
+  selector:
+    service: coworking
