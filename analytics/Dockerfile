@@ -7,7 +7,7 @@ COPY . /app
 # Install all required library from requirements.txt
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
-EXPOSE 5153
+EXPOSE 80
 
 ENV DB_USERNAME=longqb
 ENV DB_PASSWORD=mypassword
