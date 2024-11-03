@@ -1,3 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: coworking
+spec:
+  type: LoadBalancer
+  selector:
+    service: coworking
+  ports:
+    - name: "5153"
+      protocol: TCP
+      port: 5153
+      targetPort: 5153
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -45,19 +59,3 @@ spec:
             - configMapRef:
                 name: db-config
       restartPolicy: Always
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    service: coworking
-  name: coworking
-spec:
-  type: ClusterIP
-  ports:
-    - protocol: "TCP"
-      port: 5153
-      targetPort: 5153
-  selector:
-    service: coworking
